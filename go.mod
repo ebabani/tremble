@@ -8,6 +8,7 @@ require (
 	github.com/OpenPeeDeeP/depguard v1.0.0 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/gometalinter v3.0.0+incompatible // indirect
+	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
 	github.com/coreos/etcd v3.3.13+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
@@ -44,6 +45,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/koron/iferr v0.0.0-20180615142939-bb332a3b1d91 // indirect
 	github.com/kr/pty v1.1.8 // indirect
+	github.com/lightstep/lightstep-tracer-go v0.18.1
 	github.com/logrusorgru/aurora v0.0.0-20190428105938-cea283e61946 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
@@ -52,10 +54,14 @@ require (
 	github.com/nbutton23/zxcvbn-go v0.0.0-20180912185939-ae427f1e4c1d // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
+	github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9
+	github.com/opentracing-contrib/go-zap v0.0.0-20190214083200-641545003d88
+	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pelletier/go-toml v1.4.0 // indirect
 	github.com/peterh/liner v1.1.0 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/pkg/profile v1.3.0 // indirect
+	github.com/prometheus/client_golang v1.0.0
 	github.com/prometheus/common v0.6.0 // indirect
 	github.com/prometheus/procfs v0.0.3 // indirect
 	github.com/rogpeppe/fastuuid v1.1.0 // indirect
@@ -73,6 +79,8 @@ require (
 	github.com/square/go-jose/v3 v3.0.0-20190626174727-605ab0b8f117 // indirect
 	github.com/stamblerre/gocode v0.0.0-20190327203809-810592086997 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
+	github.com/uber/jaeger-client-go v2.21.1+incompatible
+	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/ugorji/go v1.1.5-pre // indirect
 	github.com/valyala/fasthttp v1.3.0 // indirect
 	github.com/zmb3/gogetdoc v0.0.0-20190228002656-b37376c5da6a // indirect

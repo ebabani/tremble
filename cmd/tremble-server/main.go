@@ -1,15 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"context"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/ebabani/tremble/logger"
+	"github.com/ebabani/tremble/tracer"
 	"github.com/ebabani/tremble/twitch"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
+
+	"github.com/lightstep/lightstep-tracer-go"
+	"github.com/opentracing-contrib/go-stdlib/nethttp"
+	"github.com/opentracing-contrib/go-zap/log"
+	"github.com/opentracing/opentracing-go"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var clientID string
@@ -19,46 +26,57 @@ func startServer(port string, r chi.Router) chan bool {
 
 	go func() {
 		zap.S().Infof("Starting server on port %s\n", port)
-		log.Println(http.ListenAndServe(port, r))
+		err := http.ListenAndServe(port, r)
+		if err != nil {
+			log.Info(err.Error())
+		}
 		zap.S().Infof("Shutting down server on port %s\n", port)
 		exit <- true
 	}()
 	return exit
 }
 
-func setupLogger() (*zap.Logger, error) {
-	logger, err := zap.NewProduction()
-	if err != nil {
-		return nil, err
-	}
-	zap.ReplaceGlobals(logger)
-
-	zap.RedirectStdLog(logger)
-	return logger, nil
-}
-
 func main() {
-	logger, err := setupLogger()
+	logger, err := logger.SetupLogger()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	defer logger.Sync()
 
-	log.Println("Starting tremble")
+	closer, err := tracer.SetupTracer("tremble-server")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer closer.Close()
+
+	log.Info("Starting tremble")
 	clientID = os.Getenv("TWITCH_CLIENT_ID")
 
 	appRouter := chi.NewRouter()
-
 	metricsRouter := chi.NewRouter()
+	twitchClinet := twitch.TwitchClient{}
 
-	appRouter.Get("/videos", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(strings.Join(twitch.GetVideos(""), ",")))
+	appRouter.Use(func(next http.Handler) http.Handler {
+		return nethttp.Middleware(opentracing.GlobalTracer(), next)
 	})
 
+	metricsRouter.Use(func(next http.Handler) http.Handler {
+		return nethttp.Middleware(opentracing.GlobalTracer(), next)
+	})
+
+	appRouter.Get("/videos", func(w http.ResponseWriter, r *http.Request) {
+		// span, ctx := opentracing.StartSpanFromContext(r.Context(), "/videos")
+		// defer span.Finish()
+		w.Write([]byte(strings.Join(twitchClinet.GetVideos(r.Context(), ""), ",")))
+	})
+
+	metricsRouter.Get("/metrics", promhttp.Handler().ServeHTTP)
 	select {
 	case <-startServer("127.0.0.1:8080", appRouter):
-		log.Println("App Server Shut Down")
+		log.Info("App Server Shut Down")
 	case <-startServer("127.0.0.1:8081", metricsRouter):
-		fmt.Println("Metrics Server Shut Down")
+		log.Info("Metrics Server Shut Down")
 	}
+
+	lightstep.Flush(context.Background(), opentracing.GlobalTracer())
 }
